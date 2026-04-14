@@ -22,7 +22,7 @@ public class App {
 
         // Firefox setup for Jenkins
         FirefoxOptions options = new FirefoxOptions();
-        options.setBinary("/usr/bin/firefox");
+        options.setBinary("/snap/firefox/8107/usr/lib/firefox/firefox");
         options.addArguments("--headless");
 
         WebDriver driver = new FirefoxDriver(options);
