@@ -21,12 +21,15 @@ public class App {
     public static void main(String[] args) throws Exception {
 
         // Firefox setup for Jenkins
-        FirefoxOptions options = new FirefoxOptions();
-        options.setBinary("/snap/firefox/8107/usr/lib/firefox/firefox");
-        options.addArguments("--headless");
+      FirefoxOptions options = new FirefoxOptions();
 
-        WebDriver driver = new FirefoxDriver(options);
+options.setBinary("/snap/firefox/current/usr/lib/firefox/firefox");
 
+options.addArguments("--headless");
+
+System.setProperty("webdriver.gecko.driver", "/usr/local/bin/geckodriver");
+
+WebDriver driver = new FirefoxDriver(options);
         driver.manage().window().setSize(new org.openqa.selenium.Dimension(1920,1080));
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
