@@ -16,42 +16,42 @@ public class App {
 
         System.setProperty("MOZ_DISABLE_CONTENT_SANDBOX", "1");
 
-FirefoxOptions options = new FirefoxOptions();
-options.addArguments("--headless");              // run without UI
-options.addArguments("--no-sandbox");            // Jenkins fix
-options.addArguments("--disable-dev-shm-usage"); // memory fix
+        FirefoxOptions options = new FirefoxOptions();
 
-WebDriver driver = new FirefoxDriver(options);
+        // Jenkins/Linux compatible options
+        options.addArguments("--headless");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+
+        // Fix marionette/profile issues
+        options.addArguments("-profile");
+        options.addArguments("/tmp/firefox-profile");
+
+        WebDriver driver = new FirefoxDriver(options);
+
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 
-        driver.manage().window().maximize();
-
+        // Open SauceDemo
         driver.get("https://www.saucedemo.com/");
-        driver.manage().window().maximize();
-        Thread.sleep(2000);
-        driver.findElement(By.id("user-name")).sendKeys("standard_user");
-        Thread.sleep(2000);
-        driver.findElement(By.id("password")).sendKeys("secret_sauce");
-        Thread.sleep(2000);
-        driver.findElement(By.id("login-button")).click();
-	Thread.sleep(2000);
 
+        driver.findElement(By.id("user-name")).sendKeys("standard_user");
+        driver.findElement(By.id("password")).sendKeys("secret_sauce");
+        driver.findElement(By.id("login-button")).click();
+
+        // Open new tab
         driver.switchTo().newWindow(WindowType.TAB);
 
+        // Practice Test Automation
         driver.get("https://practicetestautomation.com/practice-test-login/");
 
-        driver.manage().window().maximize();
-        Thread.sleep(2000);
         driver.findElement(By.id("username")).sendKeys("student");
-        Thread.sleep(2000);
         driver.findElement(By.id("password")).sendKeys("Password123");
-        Thread.sleep(2000);
         driver.findElement(By.id("submit")).click();
-	Thread.sleep(2000);
 
-
+        // Open another tab
         driver.switchTo().newWindow(WindowType.TAB);
 
+        // Automation Exercise
         driver.get("https://automationexercise.com/");
 
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
@@ -59,8 +59,8 @@ WebDriver driver = new FirefoxDriver(options);
         wait.until(ExpectedConditions.elementToBeClickable(
                 By.xpath("//a[@href='/products']"))).click();
 
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("search_product")))
-                .sendKeys("Tshirt");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.id("search_product"))).sendKeys("Tshirt");
 
         driver.findElement(By.id("submit_search")).click();
 
@@ -70,7 +70,7 @@ WebDriver driver = new FirefoxDriver(options);
         wait.until(ExpectedConditions.elementToBeClickable(
                 By.xpath("//u[contains(text(),'View Cart')]"))).click();
 
-        Thread.sleep(5000);
+        Thread.sleep(3000);
 
         driver.quit();
     }
