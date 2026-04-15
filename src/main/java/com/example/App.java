@@ -2,76 +2,85 @@ package com.example;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WindowType;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-
+import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 
 public class App {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
+        System.setProperty("webdriver.gecko.driver", "/usr/local/bin/geckodriver");
+        
 
-        System.setProperty("MOZ_DISABLE_CONTENT_SANDBOX", "1");
-
+        // Headless Firefox for Jenkins
         FirefoxOptions options = new FirefoxOptions();
 
-        // Jenkins/Linux compatible options
-        options.addArguments("--headless");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
+options.setBinary("/usr/bin/firefox"); // force correct binary
+options.addArguments("--headless");
 
-        // Fix marionette/profile issues
-        options.addArguments("-profile");
-        options.addArguments("/tmp/firefox-profile");
+//  VERY IMPORTANT for VM/Jenkins
+options.addArguments("--no-sandbox");
+options.addArguments("--disable-dev-shm-usage");
 
-        WebDriver driver = new FirefoxDriver(options);
+// disable GPU (important sometimes)
+options.addArguments("--disable-gpu");
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+WebDriver driver = new FirefoxDriver(options);
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        Actions actions = new Actions(driver);
 
-        // Open SauceDemo
-        driver.get("https://www.saucedemo.com/");
+        try {
+            //  1. SauceDemo Login
+            driver.get("https://www.saucedemo.com/");
 
-        driver.findElement(By.id("user-name")).sendKeys("standard_user");
-        driver.findElement(By.id("password")).sendKeys("secret_sauce");
-        driver.findElement(By.id("login-button")).click();
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("user-name")))
+                    .sendKeys("standard_user");
+            driver.findElement(By.id("password")).sendKeys("secret_sauce");
+            driver.findElement(By.id("login-button")).click();
 
-        // Open new tab
-        driver.switchTo().newWindow(WindowType.TAB);
+            System.out.println("SauceDemo login successful ");
 
-        // Practice Test Automation
-        driver.get("https://practicetestautomation.com/practice-test-login/");
+            //  2. Automation Exercise (new tab)
+            driver.switchTo().newWindow(WindowType.TAB);
+            driver.get("https://automationexercise.com/products");
 
-        driver.findElement(By.id("username")).sendKeys("student");
-        driver.findElement(By.id("password")).sendKeys("Password123");
-        driver.findElement(By.id("submit")).click();
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("search_product")))
+                    .sendKeys("Men Tshirt");
+            driver.findElement(By.id("submit_search")).click();
 
-        // Open another tab
-        driver.switchTo().newWindow(WindowType.TAB);
+            WebElement product = wait.until(
+                    ExpectedConditions.elementToBeClickable(By.cssSelector("a[data-product-id='2']"))
+            );
 
-        // Automation Exercise
-        driver.get("https://automationexercise.com/");
+            product.click();
 
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
+            WebElement viewCart = wait.until(
+                    ExpectedConditions.elementToBeClickable(By.cssSelector("#cartModal a[href='/view_cart']"))
+            );
+            viewCart.click();
 
-        wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//a[@href='/products']"))).click();
+            System.out.println("Automation Exercise product added to cart ");
 
-        wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.id("search_product"))).sendKeys("Tshirt");
+            // 3. Practice Test Automation (new tab)
+            driver.switchTo().newWindow(WindowType.TAB);
+            driver.get("https://practicetestautomation.com/practice-test-login/");
 
-        driver.findElement(By.id("submit_search")).click();
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("username")))
+                    .sendKeys("student");
+            driver.findElement(By.id("password")).sendKeys("Password123");
+            driver.findElement(By.id("submit")).click();
 
-        wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("(//a[contains(text(),'Add to cart')])[1]"))).click();
+            System.out.println("Practice Test Automation login successful ");
 
-        wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//u[contains(text(),'View Cart')]"))).click();
-
-        Thread.sleep(3000);
-
-        driver.quit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            driver.quit(); 
+        }
     }
 }
